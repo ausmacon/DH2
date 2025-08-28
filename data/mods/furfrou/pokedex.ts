@@ -340,11 +340,9 @@ export const Pokedex: { [k: string]: ModdedSpeciesData } = {
 		weightkg: 3.5,
 		creator: "ausma",
 	},
-	fotonknight: {
+	thesolisknight: {
 		num: 2005,
-		name: "Foton-Knight",
-		baseSpecies: "Foton",
-		forme: "Knight",
+		name: "The Solis Knight",
 		requiredItem: "Neca Sabre",
 		types: ["Fighting", "Psychic"],
 		abilities: {0: "Speed Boost", H: "Sharpness"},
@@ -391,3 +389,4 @@ export const Pokedex: { [k: string]: ModdedSpeciesData } = {
 		abilities: {0: "Blaze", H: "Magic Guard"},
 	},
 };
+
