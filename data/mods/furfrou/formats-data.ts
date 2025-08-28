@@ -299,7 +299,7 @@ export const FormatsData: {[k: string]: ModdedSpeciesFormatsData} = {
 	fluttermaneaster: {tier: "FROU"},
 
 	foton: {tier: "FROU"},
-	fotonknight: {tier: "FROU"},
+	thesolisknight: {tier: "FROU"},
 
 	meowmity: {tier: "FROU"},
 
@@ -312,3 +312,4 @@ export const FormatsData: {[k: string]: ModdedSpeciesFormatsData} = {
 	gourgeistjade: {tier: "FROU"},
 
 };
+
