@@ -194,9 +194,16 @@ export const Abilities: { [abilityid: string]: ModdedAbilityData } = {
 		name: "Ancient Core",
 	},
 	entanglingroots: {
-		// coded in moves.ts 
+		// partially coded in moves.ts
+		onTryHit(target, source, move) {
+			if (move.id === 'rapidspin' || move.id == 'mortalspin' || move.id === 'defog') {
+				for (const side of source.side.foeSidesWithConditions()) {
+					side.addSideCondition('gmaxvinelash', source, '[from] ability: Entangling Roots'););
+				}
+			}
+		},
 		name: "Entangling Roots",
-		shortDesc: "Placeholder",
+		shortDesc: "If opponent attempts removal, deny and set vines.",
 	},
 	overpoweringmelody: {
 		// TODO
