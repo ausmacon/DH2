@@ -24,6 +24,7 @@ export const Abilities: { [abilityid: string]: ModdedAbilityData } = {
 					this.add('-start', source, 'typechange', pokemon.getTypes().join(firsttype/type), '[from] ability: Chromatophores');
 				else {
 					this.add('-start', source, 'typechange', pokemon.getTypes().join(firsttype/type), '[from] ability: Chromatophores');
+				}
 			}
 		},
 		shortDesc: "changes secondary type to status move used.",
