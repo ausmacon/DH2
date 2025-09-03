@@ -34,7 +34,6 @@ export const Abilities: { [abilityid: string]: ModdedAbilityData } = {
 			this.add('-activate', pokemon, 'ability: Guided Assault');
 			pokemon.addVolatile('lockon');
 			pokemon.addVolatile('laserfocus');
-			
 		},
 		onAfterBoost(boost, target, source, effect) {
 			const pokemon = this.effectState.target;
