@@ -35,7 +35,7 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 			},
 			onBasePowerPriority: 6,
 			onBasePower(basePower, attacker, defender, move) {
-				if (move.type === 'Steel' && defender.isGrounded() && !defender.isSemiInvulnerable()) {
+				if (move.type === 'Dragon' && defender.isGrounded() && !defender.isSemiInvulnerable()) {
 					this.debug('misty terrain weaken');
 					return this.chainModify(0.5);
 				}
@@ -687,12 +687,12 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 		type: "Grass",
 		contestType: "Cool",
 	},
-	groundshatteringingrain: {
+	shatteringingrain: {
 		num: -18,
 		accuracy: 100,
 		basePower: 75,
 		category: "Physical",
-		name: "Ground Shattering Ingrain",
+		name: "Shattering Ingrain",
 		desc: "Restores the user’s HP by up to half the damage taken by the target.",
 		shortDesc: "User recovers 50% of the damage dealt.",
 		pp: 10,
@@ -754,19 +754,21 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 	},
 	scatteredsparks: {
 		num: -22,
-		accuracy: 95,
-		basePower: 100,
+		accuracy: 100,
+		basePower: 70,
 		category: "Special",
 		name: "Scattered Sparks",
-		desc: "10% chance to Burn the target.",
-		shortDesc: "10% chance to Burn the target.",
-		pp: 10,
+		desc: "Power doubles if statused.",
+		shortDesc: "Power doubles if statused.",
+		pp: 20,
 		priority: 0,
 		flags: {protect: 1, mirror: 1, metronome: 1},
-		secondary: {
-			chance: 10,
-			status: 'brn',
+		onBasePower(basePower, pokemon) {
+			if (pokemon.status && pokemon.status !== 'slp') {
+				return this.chainModify(2);
+			}
 		},
+		secondary: null,
 		target: "normal",
 		type: "Electric",
 		contestType: "Tough",
@@ -778,19 +780,19 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 		category: "Status",
 		name: "Bellowing Whistle",
 		desc: "The user’s Attack is raised by one stage and the target’s Defense is lowered by one stage.",
-		shortDesc: "Raises the user's Attack by 1. Decreases the target's Defense by 1.",
+		shortDesc: "Raises the user's Atk by 1. Decreases target's Def by 1.",
 		pp: 40,
 		priority: 0,
 		flags: {protect: 1, reflectable: 1, mirror: 1, sound: 1, bypasssub: 1, metronome: 1},
-		boosts: {
-			def: -1,
+		self: {
+			boosts: {
+				atk: 1,
+			},
 		},
-		secondary:  {
+		secondary: {
 			chance: 100,
-			self: {
-				boosts: {
-					atk: 1,
-				},
+			boosts: {
+				def: -1,
 			},
 		},
 		target: "allAdjacentFoes",
@@ -946,16 +948,16 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 		basePower: 0,
 		category: "Status",
 		name: "Ritual of Aris",
-		desc: "Highest attacking stat is raised by two stages and the user is cured of status conditions.",
-		shortDesc: "Cures user's status, raises highest attacking stat by 2.",
+		desc: "Highest attacking stat and speed is raised by one stage, the user is cured of status conditions.",
+		shortDesc: "Cures status, raises highest attacking stat and speed by 1.",
 		pp: 15,
 		priority: 0,
 		flags: {snatch: 1, metronome: 1},
 		onHit(target, source) {
 			if (source.getStat('atk', false, true) >= source.getStat('spa', false, true)) {
-				(this.boost({atk: 2}, source))
+				(this.boost({atk: 1, spe: 1}, source))
 			} else if (source.getStat('spa', false, true) > source.getStat('atk', false, true)) {
-				(this.boost({spa: 2}, source))
+				(this.boost({spa: 1, spe: 1}, source))
 			}
 				source.cureStatus();
 		},
@@ -969,12 +971,13 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 		basePower: 70,
 		category: "Physical",
 		name: "Ornithian Blade",
-		desc: "This move ignores the target’s abilities.",
-		shortDesc: "This move ignores the target’s abilities.",
-		pp: 10,
+		desc: "Ignores defense boosts. Cannot miss.",
+		shortdesc: "Ignores defense boosts. Cannot miss.",
+		pp: 15,
 		priority: 0,
-		flags: {protect: 1, mirror: 1, slicing: 1},
-		ignoreAbility: true,
+		flags: {protect: 1, metronome: 1, slicing: 1},
+		ignoreEvasion: true,
+		ignoreDefensive: true,
 		secondary: null,
 		target: "normal",
 		type: "Steel",
@@ -983,18 +986,27 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 	streetcattrickery: {
 		num: -33,
 		accuracy: 100,
-		basePower: 60,
+		basePower: 55,
 		category: "Physical",
 		name: "Street Cat Trickery",
-		desc: "Power increased by 2x if the target is holding an item.",
-		shortDesc: "Power increased by 2x if the target is holding an item.",
+		desc: "Power increased by 2x if the target is holding an item. Removes item.",
+		shortDesc: "Power increased by 2x if the target is holding an item. Removes item",
 		pp: 20,
 		priority: 0,
 		flags: {contact: 1, protect: 1, mirror: 1, metronome: 1},
 		onBasePower(basePower, source, target, move) {
 			const item = target.getItem();
+			if (!this.singleEvent('TakeItem', item, target.itemState, target, target, move, item)) return;
 			if (item.id) {
 				return this.chainModify(2);
+			}
+		},
+		onAfterHit(target, source) {
+			if (source.hp) {
+				const item = target.takeItem();
+				if (item) {
+					this.add('-enditem', target, item.name, '[from] move: Street Cat Trickery', '[of] ' + source);
+				}
 			}
 		},
 		secondary: null,
@@ -1024,10 +1036,9 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 			},
 			onBasePowerPriority: 6,
 			onBasePower(basePower, attacker, defender, move) {
-				const weakenedMoves = ['closecombat'];
-				if (weakenedMoves.includes(move.id) && defender.isGrounded() && !defender.isSemiInvulnerable()) {
-					this.debug('move weakened by midnight terrain');
-					return this.chainModify(0.5);
+							if (move.type === 'Psychic' && defender.isGrounded() && !defender.isSemiInvulnerable()) {
+								this.debug('midnight terrain weaken');
+								return this.chainModify(0.5);
 				}
 				if (move.type === 'Dark' && attacker.isGrounded()) {
 					this.debug('midnight terrain boost');
@@ -1052,5 +1063,69 @@ export const Moves: import('../sim/dex-moves').MoveDataTable = {
 		type: "Dark",
 		zMove: {boost: {spdef: 1}},
 		contestType: "Beautiful",
+	},
+	guilttrip: {
+		num: -35,
+		accuracy: 100,
+		basePower: 0,
+		category: "Status",
+		name: "Guilt Trip",
+		desc: "Lowers Attack and Special Attack by 2 stages.",
+		shortDesc: "Lowers Attack and Special Attack by 2 stages.",
+		pp: 5,
+		priority: 0,
+		flags: {protect: 1, reflectable: 1, mirror: 1, bypasssub: 1, metronome: 1},
+		onHit(target, source, move) {
+			const success = this.boost({atk: -2, spa: -2}, target, source)
+		},
+		secondary: null,
+		target: "normal",
+		type: "Dark",
+		zMove: {effect: 'healreplacement'},
+		contestType: "Cool",
+	},
+	crystalheartblessing: {
+		num: -36,
+		accuracy: true,
+		basePower: 0,
+		category: "Status",
+		name: "Crystal Heart Blessing",
+		desc: "Cures team of status. Heals user by 33%.",
+		shortDesc: "Cures team of status. Heals user by 33%.",
+		pp: 5,
+		priority: 0,
+		flags: {snatch: 1, heal: 1, metronome: 1},
+		onHit(target, source) {
+			this.add('-activate', source, 'move: Heal Bell');
+			let success = false;
+			const allies = [...target.side.pokemon, ...target.side.allySide?.pokemon || []];
+			for (const ally of allies) {
+				if (ally !== source && ally.hasAbility('soundproof')) continue;
+				if (ally.cureStatus()) success = true;
+			}
+			return success;
+		},
+		heal: [1, 3],
+		target: "allyTeam",
+		type: "Fairy",
+		zMove: {effect: 'heal'},
+		contestType: "Beautiful",
+	},
+	furioustalons: {
+		num: -37,
+		accuracy: 100,
+		basePower: 40,
+		category: "Physical",
+		name: "Furious Talons",
+		desc: "Hits twice.",
+		shortDesc: "Hits twice.",
+		pp: 10,
+		priority: 0,
+		flags: {protect: 1, metronome: 1, slicing: 1, contact: 1},
+		multihit: 2,
+		secondary: null,
+		target: "normal",
+		type: "Flying",
+		contestType: "Cool",
 	},
 };
