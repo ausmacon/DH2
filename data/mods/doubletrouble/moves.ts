@@ -55,7 +55,7 @@ export const Moves: { [moveid: string]: ModdedMoveData } = {
 		priority: 0,
 		flags: {contact: 1, protect: 1, mirror: 1, heal: 1, bite: 1},
 		onPrepareHit(target, source) {
-			this.add('-anim', target, 'Poison Fang', source);
+			this.add('-anim', source, 'Poison Fang', target);
 		},
 		drain: [1, 2],
 		secondary: null,
